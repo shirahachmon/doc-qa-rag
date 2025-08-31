@@ -1,20 +1,29 @@
+# 📘 Doc-QA-RAG
 
-# Doc Q&A (RAG demo)
+Ask questions about your own PDFs using Retrieval-Augmented Generation (RAG).
 
-Minimal PDF Q&A using LangChain (JS), OpenAI embeddings, and an in-memory vector store.
+## ✨ Features
+- Upload any PDF document
+- Extract text with [pdfjs-dist](https://www.npmjs.com/package/pdfjs-dist)
+- Chunk and embed with HuggingFace embeddings
+- Store in memory vector DB
+- Ask natural language questions → get answers strictly from your document
 
-## Quickstart
-1. Install Node 18+.
-2. Create `.env` from `.env.example` and set `OPENAI_API_KEY`.
-3. Install deps and run:
-   ```bash
-   npm i
-   npm start
-   ```
-4. Open http://localhost:3001 and:
-   - Upload a PDF
-   - Ask questions
+## 🛠 Tech Stack
+- Node.js + Express
+- LangChain (text splitter, vector store)
+- HuggingFace Inference API (Embeddings + LLM)
+- pdfjs-dist
 
-## Notes
-- Uses `MemoryVectorStore` for simplicity. Swap to FAISS/HNSWLIB for persistence.
-- Embeddings: `text-embedding-3-small`. LLM: `gpt-4o-mini` (change in `server.mjs` if needed).
+## 🚀 Getting Started
+
+```bash
+git clone https://github.com/your-username/doc-qa-rag.git
+cd doc-qa-rag
+
+npm install
+
+# create .env file
+echo "HUGGINGFACEHUB_API_KEY=hf_xxxxxxxxxx" > .env
+
+npm start
