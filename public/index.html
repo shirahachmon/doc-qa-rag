@@ -1,0 +1,77 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Doc Q&A (RAG demo)</title>
+  <style>
+    body { max-width: 900px; margin: 40px auto; font-family: system-ui, sans-serif; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; margin-bottom: 20px; }
+    button { padding: 8px 14px; border-radius: 8px; border: 1px solid #999; cursor: pointer; }
+    #answer { white-space: pre-wrap; }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .muted { color: #666; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <h1>Doc Q&A (RAG)</h1>
+  <div class="muted">Upload a PDF, index it, then ask questions grounded in the document.</div>
+
+  <div class="card">
+    <h3>1) Upload & Index PDF</h3>
+    <input type="file" id="pdf" accept=".pdf" />
+    <button id="indexBtn">Index</button>
+    <div id="indexStatus" class="muted"></div>
+  </div>
+
+  <div class="card">
+    <h3>2) Ask</h3>
+    <div class="row">
+      <input id="question" style="flex:1" placeholder="Type your question..." />
+      <button id="askBtn">Ask</button>
+    </div>
+    <h4>Answer</h4>
+    <div id="answer"></div>
+    <div id="sources" class="muted"></div>
+  </div>
+
+  <script>
+    const indexBtn = document.getElementById('indexBtn');
+    const askBtn = document.getElementById('askBtn');
+    const indexStatus = document.getElementById('indexStatus');
+    const answer = document.getElementById('answer');
+    const sources = document.getElementById('sources');
+
+    indexBtn.onclick = async () => {
+      const f = document.getElementById('pdf').files[0];
+      if (!f) { alert('Choose a PDF'); return; }
+      const fd = new FormData();
+      fd.append('file', f);
+      indexStatus.textContent = 'Indexing...';
+      const r = await fetch('/api/index', { method: 'POST', body: fd });
+      const j = await r.json();
+      indexStatus.textContent = j.ok ? `Indexed ${j.chunks} chunks.` : (j.error || 'Failed');
+    };
+
+    askBtn.onclick = async () => {
+      const q = document.getElementById('question').value.trim();
+      if (!q) return;
+      answer.textContent = 'Thinking...';
+      sources.textContent = '';
+      const r = await fetch('/api/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: q })
+      });
+      const j = await r.json();
+      if (j.answer) {
+        answer.textContent = j.answer;
+        sources.textContent = j.sources ? ('Sources: ' + j.sources.map(s => `#${s.chunk}`).join(', ')) : '';
+      } else {
+        answer.textContent = j.error || 'Error';
+      }
+    };
+  </script>
+</body>
+</html>
